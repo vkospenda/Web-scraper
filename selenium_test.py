@@ -1,3 +1,5 @@
+import pandas as pd
+import openpyxl
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains 
@@ -26,14 +28,42 @@ action = ActionChains(driver)
 action.click(on_element=cookie)
 action.perform()
 
-# samo cene
-cene = driver.find_elements(By.CSS_SELECTOR, "meta[itemprop='price']")
-with open(file, "a") as f:
-    for i in cene:
-        #print(i.get_attribute("content"))
-        f.write(i.get_attribute("content") + "\n")
+# Listi za spremenljivke
+ls_cene = []
+ls_mesta = []
+ls_kvadrature = []
+ls_leto = []
 
-# TODO: 1. poleg cene tudi enota (ni vedno €, je lahko tudi €/m2)
-# TODO: 2. Naredit Git Repositorij
+# Note to self: ko iščeš po css selectorju moreš "extractat" besedilo tako da daš <spremenljivka>.text
+# ker iščeš tag "a" s classom "url-title-d" daš piko, če pa bi iskal tag z ID bi dal "#"
+
+# Najdem cene
+cene = driver.find_elements(By.CSS_SELECTOR, "div.property-details h6")
+for c in cene:
+    ls_cene.append(c.text)
+    
+# Najdem mesto
+mesta = driver.find_elements(By.CSS_SELECTOR, "a.url-title-d h2") 
+for m in mesta:
+    ls_mesta.append(m.text)
+
+
+# Locate all <ul> elements with the itemprop attribute 'disambiguatingDescription' - v teh elementih se nahaja kvadratura, leto ...
+ul_elements = driver.find_elements(By.CSS_SELECTOR, 'ul[itemprop="disambiguatingDescription"]')
+
+# Iterate through each <ul> element to find the text in the <li> element
+for ul_element in ul_elements:
+    # Najdem kvadraturo in leto glede na pozicijo v <ul> elementu
+    kvadratura = ul_element.find_elements(By.TAG_NAME, 'li')[0]
+    leto = ul_element.find_elements(By.TAG_NAME, 'li')[1]
+
+    ls_kvadrature.append(kvadratura.text)
+    ls_leto.append(leto.text)
+
+# ustvarim dataFrame
+df = pd.DataFrame(list(zip(ls_mesta, ls_cene, ls_kvadrature, ls_leto)))
+df.columns = ["Mesta", "Cene", "Kvadrature", "Leto"]
+print(df)
+
 driver.quit()
 print("Program je zaključil")
