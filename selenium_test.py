@@ -2,6 +2,8 @@
 # ker iščeš tag "a" s classom "url-title-d" daš piko, če pa bi iskal tag z ID bi dal "#"
 
 import time
+import os
+import filecmp
 from tqdm import tqdm
 import pandas as pd
 import openpyxl
@@ -104,6 +106,19 @@ df["Cene"] = df["Cene"].apply(replace_and_check)
 # Specifičen data frame za: KOPER, <350000€, 3,4,5 sobno
 spec_df = df[(df["Mesta"] == "KOPER") & (df["Cene"] < max_cena) & ((df["Število sob"] == "3-sobno") | (df["Število sob"] == "4-sobno") | (df["Število sob"] == "5 in večsobno"))]
 spec_df.to_excel("kp_nep.xlsx")
+
+# TODO: reši primerjavo med staro in novo verzijo tabele
+# if os.path.isfile("kp_nep.xlsx"):
+#     # Naredim začasen excel
+#     spec_df.to_excel("kp_nep-temp.xlsx")
+#     # Primerjam že obstoječ excel z začasnim. Če sta po vsebini enaka, začasni excel izbrišem
+#     if filecmp.cmp("kp_nep.xlsx", "kp_nep-temp.xlsx", shallow=False):
+#         os.remove("kp_nep-temp.xlsx")
+#     # Če excela nista enaka, prepišem novo vsebino
+#     else:
+#         spec_df.to_excel("kp_nep.xlsx")
+# else:
+#     spec_df.to_excel("kp_nep.xlsx")
 
 driver.quit()
 print("Program je zaključil")
