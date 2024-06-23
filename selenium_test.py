@@ -17,6 +17,8 @@ ls_cene = []
 ls_mesta = []
 ls_kvadrature = []
 ls_leto = []
+ls_stevilo_sob = []
+ls_url = []
 
 ### FUNKCIJE ###
 def get_data():
@@ -41,7 +43,15 @@ def get_data():
         ls_kvadrature.append(kvadratura.text)
         ls_leto.append(leto.text)
     
-    # TODO: dodaj scrape za število sob. Dodaj tudi stolpec v df
+    # URL oglasa
+    urls = driver.find_elements(By.CSS_SELECTOR, "a.url-title-d") 
+    for url in urls:
+        ls_url.append(url.get_attribute("href"))
+    
+    #število sob
+    st_sob = driver.find_elements(By.CSS_SELECTOR, "span.tipi")
+    for st in st_sob:
+        ls_stevilo_sob.append(st.text)
 
 ### ZAČETEK PROGRAMA ###
 
@@ -77,12 +87,23 @@ for i in tqdm(range(0,num_pages), desc="Scrapam strani"):
     time.sleep(2)  
 
 # ustvarim dataFrame
-df = pd.DataFrame(list(zip(ls_mesta, ls_cene, ls_kvadrature, ls_leto)))
-df.columns = ["Mesta", "Cene", "Kvadrature", "Leto"]
-
-
+df = pd.DataFrame(list(zip(ls_mesta, ls_cene, ls_kvadrature, ls_stevilo_sob, ls_leto, ls_url)))
+df.columns = ["Mesta", "Cene", "Kvadrature", "Število sob", "Leto", "Link"]
 df.to_excel("nepremicnine_obala.xlsx")
-#print(df)
+
+max_cena = 350000
+
+def replace_and_check(string):
+    split = string.split(" ")
+    split[0] = split[0].replace(".", "")
+    split[0] = split[0].replace(",", ".")
+    return float(split[0])
+
+df["Cene"] = df["Cene"].apply(replace_and_check)
+
+# Specifičen data frame za: KOPER, <350000€, 3,4,5 sobno
+spec_df = df[(df["Mesta"] == "KOPER") & (df["Cene"] < max_cena) & ((df["Število sob"] == "3-sobno") | (df["Število sob"] == "4-sobno") | (df["Število sob"] == "5 in večsobno"))]
+spec_df.to_excel("kp_nep.xlsx")
 
 driver.quit()
 print("Program je zaključil")

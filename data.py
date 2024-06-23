@@ -1,24 +1,22 @@
+# Note to self: pri pandas dataframih lahko uporabljaš funkcijo query za pridobivanje specifičnih podatkov kot pri SQL bazi
+# TODO: ugotovit kako praviln exctractat in uporabit 
+
 import pandas as pd
 import openpyxl
 
 excel = "nepremicnine_obala.xlsx"
 df = pd.read_excel(excel)
 
-def replace(string):
+max_cena = 350000
+
+def replace_and_check(string):
     split = string.split(" ")
     split[0] = split[0].replace(".", "")
     split[0] = split[0].replace(",", ".")
-    return split[0]
+    return float(split[0])
 
-# stringe pretvorim v številke, kjer je to potrebno
-# for i in df["Cene"]:
-#     split_str = i.split(" ")
-#     split_str[0] = split_str[0].replace(".", "")
-#     split_str[0] = split_str[0].replace(",", ".")
-df["Cene"] = df["Cene"].apply(replace)
-print(df["Cene"])
+df["Cene"] = df["Cene"].apply(replace_and_check)
 
-print(df)
-
-# # Specifiečn meni za "KOPER"
-# kp_df = df[df["Mesta"] == "KOPER" & df["Cene"] < 350000]
+# Specifičen data frame za: KOPER, <350000€, 3,4,5 sobno
+spec_df = df[(df["Mesta"] == "KOPER") & (df["Cene"] < max_cena) & ((df["Število sob"] == "3-sobno") | (df["Število sob"] == "4-sobno") | (df["Število sob"] == "5 in večsobno"))]
+spec_df.to_excel("kp_nep.xlsx")
