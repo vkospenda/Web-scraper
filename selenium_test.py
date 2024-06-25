@@ -94,18 +94,6 @@ df = pd.DataFrame(list(zip(ls_mesta, ls_cene, ls_kvadrature, ls_stevilo_sob, ls_
 df.columns = ["Mesto", "Cena", "Kvadratura", "Število sob", "Leto", "Link"]
 df.to_excel("nepremicnine_obala.xlsx", index=False)
 
-# def replace_and_check(string):
-#     split = string.split(" ")
-#     split[0] = split[0].replace(".", "")
-#     split[0] = split[0].replace(",", ".")
-#     return float(split[0])
-
-# df["Cena"] = df["Cena"].apply(replace_and_check)
-
-# # Specifičen data frame za: KOPER, <350000€, 3,4,5 sobno
-# spec_df = df[(df["Mesto"] == "KOPER") & (df["Cena"] < max_cena) & ((df["Število sob"] == "3-sobno") | (df["Število sob"] == "4-sobno") | (df["Število sob"] == "5 in večsobno"))]
-# spec_df.to_excel("kp_nep.xlsx", index=False)
-
 data_module.execute_replace(df)
 data_module.execute_comparison(df)
 
